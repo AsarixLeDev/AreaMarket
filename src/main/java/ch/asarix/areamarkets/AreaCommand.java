@@ -11,6 +11,7 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataContainer;
@@ -118,16 +119,7 @@ public class AreaCommand implements CommandExecutor {
                 }
                 break;
             case "give":
-                Material material = null;
-                try {
-                    material = Material.matchMaterial("woncore:delimitation_flag");
-                    if (material == null) {
-                        material = Material.matchMaterial("woncore:delimitation_flag", true);
-                    }
-                }
-                catch (Exception e) {
-                    e.printStackTrace();
-                }
+                Material material = Material.matchMaterial("woncore_delimitation_flag");
                 if (material == null) {
                     System.err.println("Failed to get modded area item");
                     material = Material.NAME_TAG;
