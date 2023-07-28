@@ -1,0 +1,10 @@
+name: AreaMarkets
+version: '${project.version}'
+main: ch.asarix.areamarkets.AreaMarkets
+api-version: 1.18
+depend:
+  - Vault
+  - Factions
+commands:
+  zone:
+    description: zone command
