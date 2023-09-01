@@ -11,7 +11,6 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataContainer;
@@ -57,8 +56,7 @@ public class AreaCommand implements CommandExecutor {
                 if (targetFaction == null) {
                     if (fPlayer.hasFaction()) {
                         targetFaction = fPlayer.getFaction();
-                    }
-                    else {
+                    } else {
                         commandSender.sendMessage("§cVous n'êtes dans aucune faction !");
                         return true;
                     }
@@ -95,8 +93,7 @@ public class AreaCommand implements CommandExecutor {
                             }
                         }
                     }
-                }
-                else if (!fPlayer.hasFaction()) {
+                } else if (!fPlayer.hasFaction()) {
                     commandSender.sendMessage("§cCette commande ne peut être exécutée " +
                             "qu'uniquement par un joueur qui appartient à une faction !");
                     return true;
@@ -144,8 +141,7 @@ public class AreaCommand implements CommandExecutor {
                         commandSender.sendMessage("§c" + strings[1] + " : Ce joueur n'existe pas ou n'est pas en ligne !");
                         return true;
                     }
-                }
-                else {
+                } else {
                     targetPlayer = (Player) commandSender;
                 }
 

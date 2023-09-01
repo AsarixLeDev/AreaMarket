@@ -7,8 +7,8 @@ public class RentDeal implements AreaDeal {
     private final UUID customer;
     private final double price;
     private final long startTimeMillis;
-    private long duration;
     private final Set<UUID> access;
+    private long duration;
 
 
     public RentDeal(UUID customer, double price, long expirationDate) {

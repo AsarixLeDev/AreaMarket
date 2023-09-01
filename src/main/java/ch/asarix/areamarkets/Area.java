@@ -3,7 +3,6 @@ package ch.asarix.areamarkets;
 import ch.asarix.areamarkets.deal.AreaDeal;
 import ch.asarix.areamarkets.deal.DealSign;
 import ch.asarix.areamarkets.deal.DealType;
-import ch.asarix.areamarkets.deal.RentDeal;
 import ch.asarix.areamarkets.util.UUIDManager;
 import com.massivecraft.factions.FPlayer;
 import com.massivecraft.factions.FPlayers;

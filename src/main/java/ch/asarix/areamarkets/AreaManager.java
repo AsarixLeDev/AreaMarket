@@ -6,15 +6,10 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.massivecraft.factions.FPlayer;
-import com.massivecraft.factions.FPlayers;
 import com.massivecraft.factions.Faction;
-import com.massivecraft.factions.zcore.fperms.Access;
-import com.massivecraft.factions.zcore.fperms.PermissableAction;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.entity.Player;
 
 import java.io.File;
 import java.io.IOException;
@@ -27,9 +22,8 @@ import java.util.stream.StreamSupport;
 public class AreaManager {
 
     private final AreaMarkets plugin;
-    private File storageFolder;
     private final List<Area> areas = new ArrayList<>();
-
+    private File storageFolder;
     private int signUpdateTaskId;
 
     public AreaManager(AreaMarkets plugin) {
@@ -83,8 +77,7 @@ public class AreaManager {
                             AreaDeal deal;
                             if (dealType == DealType.PURCHASE) {
                                 deal = new PurchaseDeal(customer, dealPrice, access);
-                            }
-                            else {
+                            } else {
                                 deal = new RentDeal(customer, dealPrice, expirationDate, access);
                             }
                             area.setCurrentDeal(deal);
@@ -96,7 +89,6 @@ public class AreaManager {
             }
         }
         signUpdateTaskId = Bukkit.getScheduler().scheduleSyncRepeatingTask(plugin, () -> {
-            System.out.println("Updating area signs...");
             for (Area area : plugin.getAreaManager().getAreas()) {
                 //Should update sign if the return value is null
                 area.getCurrentDeal();

@@ -75,11 +75,9 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>com.massivecraft</groupId>
-            <artifactId>factions</artifactId>
-            <version>1.18.2</version>
-            <systemPath>${project.basedir}/libs/SaberFactions.jar</systemPath>
-            <scope>system</scope>
+            <groupId>com.github.SaberLLC</groupId>
+            <artifactId>Saber-Factions</artifactId>
+            <version>4.1.2-STABLE</version>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>

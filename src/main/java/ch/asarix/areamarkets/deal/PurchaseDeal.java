@@ -1,7 +1,6 @@
 package ch.asarix.areamarkets.deal;
 
 import org.bukkit.Location;
-import org.checkerframework.checker.units.qual.A;
 
 import java.util.*;
 
@@ -10,9 +9,8 @@ public class PurchaseDeal implements AreaDeal {
     private final UUID customer;
 
     private final double price;
-    private Location signLocation = null;
-
     private final Set<UUID> access;
+    private Location signLocation = null;
 
     public PurchaseDeal(UUID customer, double price) {
         this(customer, price, new ArrayList<>());
