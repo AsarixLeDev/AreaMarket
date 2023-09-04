@@ -40,6 +40,7 @@ public final class AreaMarkets extends JavaPlugin implements Listener {
     private final Map<UUID, AreaSession> sessionMap = new HashMap<>();
     private NamespacedKey namespacedKey;
     private AreaManager areaManager;
+    private BlockEventHandler blockEventHandler;
     private Economy econ = null;
 
     public static AreaMarkets getInstance() {
@@ -48,6 +49,10 @@ public final class AreaMarkets extends JavaPlugin implements Listener {
 
     public AreaManager getAreaManager() {
         return areaManager;
+    }
+
+    public BlockEventHandler getBlockEventHandler() {
+        return blockEventHandler;
     }
 
     public NamespacedKey getNamespacedKey() {
@@ -75,6 +80,7 @@ public final class AreaMarkets extends JavaPlugin implements Listener {
         areaManager = new AreaManager(this);
         areaManager.init();
         Bukkit.getPluginManager().registerEvents(this, this);
+        this.blockEventHandler = new BlockEventHandler(this);
         getCommand("zone").setExecutor(new AreaCommand(this));
     }
 
@@ -175,69 +181,67 @@ public final class AreaMarkets extends JavaPlugin implements Listener {
         Block block = event.getClickedBlock();
         if (block == null) return;
         Area area = areaManager.getAreaBySignLocation(block.getLocation());
-        if (area != null) {
-            FPlayer fPlayer = FPlayers.getInstance().getByPlayer(player);
-            Faction ownerFaction = area.getOwnerFaction();
-            if (fPlayer.hasFaction() && fPlayer.getFaction() == ownerFaction) {
-                DealSign dealSign = area.getDealSign();
-                DealType dealType = dealSign.getDealType();
-                if (area.getCurrentDeal() != null) {
-                    if (area.getCurrentDeal().dealType() == DealType.PURCHASE) {
-                        if (area.getCurrentDeal().customer() == player.getUniqueId()) {
-                            player.sendMessage("Vous possédez déjà cette zone !");
-                            return;
-                        }
-                        player.sendMessage(UUIDManager.get().getName(area.getCurrentDeal().customer()) + " possède déjà cette zone !");
-                        return;
-                    }
-                    if (area.getCurrentDeal().customer() != player.getUniqueId()) {
-                        player.sendMessage(UUIDManager.get().getName(area.getCurrentDeal().customer()) + " loue déjà cette zone !");
-                    } else {
-                        double playerPurse = econ.getBalance(player);
-                        if (playerPurse < dealSign.getPrice()) {
-                            player.sendMessage("Vous n'avez pas de quoi prolonger votre location de cette zone !");
-                            return;
-                        }
-                        econ.withdrawPlayer(player, dealSign.getPrice());
-                        ownerFaction.setFactionBalance(ownerFaction.getFactionBalance() + dealSign.getPrice());
-                        area.broadcastToOwners("Le joueur " + player.getName() + " a loué, pour une journée de plus, la zone "
-                                + area.getName() + " pour " + dealSign.getPrice() + "$.");
-                        ((RentDeal) area.getCurrentDeal()).addDuration(TimeUnit.DAYS.toMillis(1));
-                        area.updateDealSign();
-                        player.sendMessage("Vous avez loué la zone " + area.getName() + " à votre faction pour une journée de plus !");
-                    }
+        if (area == null) return;
+        FPlayer fPlayer = FPlayers.getInstance().getByPlayer(player);
+        Faction ownerFaction = area.getOwnerFaction();
+        if (!fPlayer.hasFaction() || fPlayer.getFaction() != ownerFaction) return;
+        DealSign dealSign = area.getDealSign();
+        DealType dealType = dealSign.getDealType();
+        if (area.getCurrentDeal() != null) {
+            if (area.getCurrentDeal().dealType() == DealType.PURCHASE) {
+                if (area.getCurrentDeal().customer() == player.getUniqueId()) {
+                    player.sendMessage("Vous possédez déjà cette zone !");
                     return;
                 }
-
-                double playerPurse = econ.getBalance(player);
-                if (dealType == DealType.PURCHASE) {
-                    if (playerPurse < dealSign.getPrice()) {
-                        player.sendMessage("Vous n'avez pas de quoi acheter cette zone !");
-                        return;
-                    }
-                    econ.withdrawPlayer(player, dealSign.getPrice());
-                    ownerFaction.setFactionBalance(ownerFaction.getFactionBalance() + dealSign.getPrice());
-                    area.broadcastToOwners("Le joueur " + player.getName() + " a acheté la zone "
-                            + area.getName() + " pour " + dealSign.getPrice() + "$.");
-                    AreaDeal areaDeal = new PurchaseDeal(player.getUniqueId(), dealSign.getPrice());
-                    area.setCurrentDeal(areaDeal);
-                    player.sendMessage("Vous avez acheté la zone " + area.getName() + " à votre faction !");
-                    //Purchase
-                } else {
-                    if (playerPurse < dealSign.getPrice()) {
-                        player.sendMessage("Vous n'avez pas de quoi louer cette zone !");
-                        return;
-                    }
-                    econ.withdrawPlayer(player, dealSign.getPrice());
-                    ownerFaction.setFactionBalance(ownerFaction.getFactionBalance() + dealSign.getPrice());
-                    area.broadcastToOwners("Le joueur " + player.getName() + " a loué, pour une journée, la zone "
-                            + area.getName() + " pour " + dealSign.getPrice() + "$.");
-                    AreaDeal areaDeal = new RentDeal(player.getUniqueId(), dealSign.getPrice(), System.currentTimeMillis() + TimeUnit.DAYS.toMillis(1));
-                    area.setCurrentDeal(areaDeal);
-                    player.sendMessage("Vous avez loué la zone " + area.getName() + " à votre faction pour une journée !");
-                    //Rent
-                }
+                player.sendMessage(UUIDManager.get().getName(area.getCurrentDeal().customer()) + " possède déjà cette zone !");
+                return;
             }
+            if (area.getCurrentDeal().customer() != player.getUniqueId()) {
+                player.sendMessage(UUIDManager.get().getName(area.getCurrentDeal().customer()) + " loue déjà cette zone !");
+            } else {
+                double playerPurse = econ.getBalance(player);
+                if (playerPurse < dealSign.getPrice()) {
+                    player.sendMessage("Vous n'avez pas de quoi prolonger votre location de cette zone !");
+                    return;
+                }
+                econ.withdrawPlayer(player, dealSign.getPrice());
+                ownerFaction.setFactionBalance(ownerFaction.getFactionBalance() + dealSign.getPrice());
+                area.broadcastToOwners("Le joueur " + player.getName() + " a loué, pour une journée de plus, la zone "
+                        + area.getName() + " pour " + dealSign.getPrice() + "$.");
+                ((RentDeal) area.getCurrentDeal()).addDuration(TimeUnit.DAYS.toMillis(1));
+                area.updateDealSign();
+                player.sendMessage("Vous avez loué la zone " + area.getName() + " à votre faction pour une journée de plus !");
+            }
+            return;
+        }
+
+        double playerPurse = econ.getBalance(player);
+        if (dealType == DealType.PURCHASE) {
+            if (playerPurse < dealSign.getPrice()) {
+                player.sendMessage("Vous n'avez pas de quoi acheter cette zone !");
+                return;
+            }
+            econ.withdrawPlayer(player, dealSign.getPrice());
+            ownerFaction.setFactionBalance(ownerFaction.getFactionBalance() + dealSign.getPrice());
+            area.broadcastToOwners("Le joueur " + player.getName() + " a acheté la zone "
+                    + area.getName() + " pour " + dealSign.getPrice() + "$.");
+            AreaDeal areaDeal = new PurchaseDeal(player.getUniqueId(), dealSign.getPrice());
+            area.setCurrentDeal(areaDeal);
+            player.sendMessage("Vous avez acheté la zone " + area.getName() + " à votre faction !");
+            //Purchase
+        } else {
+            if (playerPurse < dealSign.getPrice()) {
+                player.sendMessage("Vous n'avez pas de quoi louer cette zone !");
+                return;
+            }
+            econ.withdrawPlayer(player, dealSign.getPrice());
+            ownerFaction.setFactionBalance(ownerFaction.getFactionBalance() + dealSign.getPrice());
+            area.broadcastToOwners("Le joueur " + player.getName() + " a loué, pour une journée, la zone "
+                    + area.getName() + " pour " + dealSign.getPrice() + "$.");
+            AreaDeal areaDeal = new RentDeal(player.getUniqueId(), dealSign.getPrice(), System.currentTimeMillis() + TimeUnit.DAYS.toMillis(1));
+            area.setCurrentDeal(areaDeal);
+            player.sendMessage("Vous avez loué la zone " + area.getName() + " à votre faction pour une journée !");
+            //Rent
         }
     }
 

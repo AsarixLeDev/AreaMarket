@@ -65,7 +65,7 @@ public class AreaManager {
                                 && dealNode.has("price")
                                 && dealNode.has("type")
                                 && dealNode.has("expiration_date")
-                                && dealNode.has("access")) {
+                                && dealNode.has("access_list")) {
                             UUID customer = UUID.fromString(dealNode.get("customer").asText());
                             double dealPrice = dealNode.get("price").asDouble();
                             DealType dealType = DealType.valueOf(dealNode.get("type").asText().toUpperCase());
