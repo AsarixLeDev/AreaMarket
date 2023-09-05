@@ -6,7 +6,10 @@ import ch.asarix.areamarkets.util.UUIDManager;
 import com.massivecraft.factions.*;
 import com.massivecraft.factions.zcore.fperms.Access;
 import com.massivecraft.factions.zcore.fperms.PermissableAction;
-import org.bukkit.*;
+import org.bukkit.Bukkit;
+import org.bukkit.Chunk;
+import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -192,16 +195,11 @@ public class AreaCommand implements CommandExecutor {
                             "n'appartiennent pas à votre faction !");
                     return true;
                 }
-                boolean noOverlap = true;
                 for (Area area : plugin.getAreaManager().getAreas()) {
-                    if (doAreasOverlap(session.getFrom(), session.getTo(), area.getFrom(), area.getTo())) {
-                        noOverlap = false;
-                        break;
+                    if (LocationUtil.doAreasOverlap(session.getFrom(), session.getTo(), area.getFrom(), area.getTo())) {
+                        commandSender.sendMessage("§cUne autre zone est au moins partiellement contenue dans la zone sélectionnée !");
+                        return true;
                     }
-                }
-                if (!noOverlap) {
-                    commandSender.sendMessage("§cUne autre zone est au moins partiellement contenue dans la zone sélectionnée !");
-                    return true;
                 }
                 plugin.getAreaManager().saveArea(faction, areaName, session);
                 commandSender.sendMessage("Zone " + areaName + " sauvegardée !");
@@ -240,39 +238,5 @@ public class AreaCommand implements CommandExecutor {
                 //Help
         }
         return false;
-    }
-
-
-    private boolean doAreasOverlap(Location corner1A, Location corner2A, Location corner1B, Location corner2B) {
-        World worldA = corner1A.getWorld();
-        World worldB = corner1B.getWorld();
-
-        if (worldA == null || !worldA.equals(corner2A.getWorld()) ||
-                worldB == null || !worldB.equals(corner2B.getWorld())) {
-            // The locations are in different worlds
-            return false;
-        }
-
-        int minX1 = Math.min(corner1A.getBlockX(), corner2A.getBlockX());
-        int minY1 = Math.min(corner1A.getBlockY(), corner2A.getBlockY());
-        int minZ1 = Math.min(corner1A.getBlockZ(), corner2A.getBlockZ());
-
-        int maxX1 = Math.max(corner1A.getBlockX(), corner2A.getBlockX());
-        int maxY1 = Math.max(corner1A.getBlockY(), corner2A.getBlockY());
-        int maxZ1 = Math.max(corner1A.getBlockZ(), corner2A.getBlockZ());
-
-        int minX2 = Math.min(corner1B.getBlockX(), corner2B.getBlockX());
-        int minY2 = Math.min(corner1B.getBlockY(), corner2B.getBlockY());
-        int minZ2 = Math.min(corner1B.getBlockZ(), corner2B.getBlockZ());
-
-        int maxX2 = Math.max(corner1B.getBlockX(), corner2B.getBlockX());
-        int maxY2 = Math.max(corner1B.getBlockY(), corner2B.getBlockY());
-        int maxZ2 = Math.max(corner1B.getBlockZ(), corner2B.getBlockZ());
-
-        boolean overlapX = (minX1 <= maxX2) && (maxX1 >= minX2);
-        boolean overlapY = (minY1 <= maxY2) && (maxY1 >= minY2);
-        boolean overlapZ = (minZ1 <= maxZ2) && (maxZ1 >= minZ2);
-
-        return overlapX && overlapY && overlapZ;
     }
 }

@@ -7,7 +7,9 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.massivecraft.factions.Faction;
+import com.massivecraft.factions.shade.apache.tuple.Pair;
 import org.bukkit.Bukkit;
+import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.Material;
 
@@ -17,6 +19,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 public class AreaManager {
@@ -224,6 +227,14 @@ public class AreaManager {
         return areas.stream()
                 .filter(area -> area.contains(location))
                 .findAny().orElse(null);
+    }
+
+    public List<Area> getAreasInChunk(Chunk chunk) {
+        return areas.stream()
+                .filter(area -> LocationUtil.doAreasOverlap(
+                        Pair.of(area.getFrom(), area.getTo()),
+                        LocationUtil.getChunkCorners(chunk)))
+                .collect(Collectors.toList());
     }
 
     public void removeAreas(Faction faction) {

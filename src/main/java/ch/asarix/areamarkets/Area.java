@@ -22,6 +22,8 @@ public class Area {
     private final Location to;
     private final String ownerFactionId;
     private AreaDeal currentDeal = null;
+    private boolean protection = false;
+    private Long protectedSinceMillis = null;
 
     private DealSign dealSign = null;
 
@@ -53,21 +55,7 @@ public class Area {
     }
 
     public boolean contains(Location location) {
-        double minX = Math.min(from.getX(), to.getX());
-        double minY = Math.min(from.getY(), to.getY());
-        double minZ = Math.min(from.getZ(), to.getZ());
-
-        double maxX = Math.max(from.getX(), to.getX());
-        double maxY = Math.max(from.getY(), to.getY());
-        double maxZ = Math.max(from.getZ(), to.getZ());
-
-        double x = location.getX();
-        double y = location.getY();
-        double z = location.getZ();
-
-        return x >= minX && x <= maxX &&
-                y >= minY && y <= maxY &&
-                z >= minZ && z <= maxZ;
+        return LocationUtil.isLocationInArea(location, from, to);
     }
 
     public AreaDeal getCurrentDeal() {
@@ -129,5 +117,18 @@ public class Area {
                         }
                 )
                 .forEach(player -> player.sendMessage(message));
+    }
+
+    public boolean hasProtection() {
+        long protectionDurationMillis = (long) (AreaMarkets.getInstance().getConfig().getDouble("protection-after-unclaim-duration-days", 2) * 24 * 60 * 60 * 1000);
+        if (System.currentTimeMillis() - protectedSinceMillis > protectionDurationMillis) {
+            this.protection = false;
+        }
+        return protection;
+    }
+
+    public void activateProtection() {
+        this.protection = true;
+        this.protectedSinceMillis = System.currentTimeMillis();
     }
 }

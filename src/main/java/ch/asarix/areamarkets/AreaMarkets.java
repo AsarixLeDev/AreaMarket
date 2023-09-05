@@ -80,6 +80,7 @@ public final class AreaMarkets extends JavaPlugin implements Listener {
         areaManager = new AreaManager(this);
         areaManager.init();
         Bukkit.getPluginManager().registerEvents(this, this);
+        Bukkit.getPluginManager().registerEvents(new AreaBlockListener(), this);
         this.blockEventHandler = new BlockEventHandler(this);
         getCommand("zone").setExecutor(new AreaCommand(this));
     }
